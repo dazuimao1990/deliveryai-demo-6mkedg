@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>黑夜模式预览 · 沸点火锅点单 Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  /* ===== Design System Tokens ===== */
+  :root {
+    --rice-50: #fffdf8;
+    --rice-100: #fbf5ea;
+    --rice-200: #f3e6d0;
+    --chili-50: #fff1ef;
+    --chili-100: #ffddd8;
+    --chili-500: #e13b2b;
+    --chili-600: #c92f21;
+    --chili-700: #a9231a;
+    --amber-100: #fff2c7;
+    --amber-400: #f5b83f;
+    --amber-500: #e69b18;
+    --charcoal-500: #5f5b55;
+    --charcoal-700: #34312d;
+    --charcoal-900: #211f1c;
+
+    /* Semantic - Light */
+    --bg-page: var(--rice-100);
+    --bg-card: #ffffff;
+    --bg-elevated: var(--rice-200);
+    --bg-input: #ffffff;
+    --text-primary: var(--charcoal-900);
+    --text-secondary: var(--charcoal-500);
+    --border-subtle: rgba(33, 31, 28, 0.05);
+    --border-default: rgba(33, 31, 28, 0.1);
+    --bg-chili-soft: var(--chili-50);
+    --bg-amber-soft: var(--amber-100);
+    --bg-nav: rgba(255, 255, 255, 0.95);
+    --bg-toast: rgba(33, 31, 28, 0.9);
+    --text-toast: #ffffff;
+    --paper-noise-color: rgba(170, 110, 60, 0.08);
+    --shadow-card: 0 10px 30px rgba(70, 45, 25, 0.08);
+    --shadow-float: 0 18px 55px rgba(78, 34, 20, 0.18);
+    --bg-blur-1: var(--chili-100);
+    --bg-blur-2: var(--amber-100);
+    --bg-banner: var(--charcoal-900);
+    --text-banner: var(--rice-100);
+  }
+
+  html.dark {
+    /* Semantic - Dark (from tokens.dark.json) */
+    --bg-page: #1d1d1d;
+    --bg-card: #141414;
+    --bg-elevated: #272727;
+    --bg-input: #272727;
+    --text-primary: #dcdcdc;
+    --text-secondary: #adadad;
+    --border-subtle: #303030;
+    --border-default: #3e3e3e;
+    --bg-chili-soft: rgba(225, 59, 43, 0.15);
+    --bg-amber-soft: rgba(245, 184, 63, 0.15);
+    --bg-nav: rgba(20, 20, 20, 0.95);
+    --bg-toast: rgba(220, 220, 220, 0.9);
+    --text-toast: #1d1d1d;
+    --paper-noise-color: rgba(255, 255, 255, 0.03);
+    --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.3);
+    --shadow-float: 0 18px 55px rgba(0, 0, 0, 0.4);
+    --bg-blur-1: rgba(225, 59, 43, 0.12);
+    --bg-blur-2: rgba(245, 184, 63, 0.1);
+    --bg-banner: #34312d;
+    --text-banner: #f3e6d0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', 'Noto Sans SC', system-ui, sans-serif;
+    background: var(--bg-page);
+    color: var(--text-primary);
+    transition: background-color 250ms ease, color 250ms ease;
+    min-height: 100vh;
+  }
+  html * {
+    transition-property: background-color, border-color, color, fill, stroke;
+    transition-duration: 250ms;
+    transition-timing-function: ease;
+  }
+
+  /* ===== Paper Noise ===== */
+  .paper-noise {
+    background-image: radial-gradient(var(--paper-noise-color) .7px, transparent .7px);
+    background-size: 12px 12px;
+  }
+
+  /* ===== Banner ===== */
+  .banner {
+    background: var(--bg-banner);
+    color: var(--text-banner);
+    padding: 0.5rem 1rem;
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+
+  /* ===== TopBar ===== */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    border-bottom: 1px solid var(--border-subtle);
+    background: var(--bg-nav);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+  .topbar-inner {
+    max-width: 80rem;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    height: 4rem;
+    padding: 0 1rem;
+  }
+  @media (min-width: 1024px) { .topbar-inner { padding: 0 1.5rem; } }
+  .brand-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+  }
+  .brand-icon {
+    width: 2.25rem;
+    height: 2.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.75rem;
+    background: var(--chili-500);
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 900;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  }
+  .brand-name { font-weight: 700; line-height: 1.1; color: var(--text-primary); font-size: 0.875rem; }
+  .brand-sub { font-size: 0.7rem; color: var(--text-secondary); }
+  .table-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    background: var(--bg-elevated);
+    padding: 0.4rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .table-badge svg { color: var(--chili-500); }
+  .topbar-nav { margin-left: auto; display: flex; align-items: center; gap: 0.25rem; }
+  @media (max-width: 767px) { .topbar-nav-desktop { display: none; } }
+  .topbar-nav-desktop { display: flex; align-items: center; gap: 0.25rem; }
+
+  /* ===== Buttons ===== */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 200ms;
+    font-family: inherit;
+  }
+  .btn-default { background: var(--chili-500); color: #fff; padding: 0.625rem 1.25rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+  .btn-default:hover { background: var(--chili-600); }
+  .btn-secondary { background: var(--bg-elevated); color: var(--text-primary); padding: 0.625rem 1.25rem; }
+  .btn-outline { border: 1px solid var(--border-default); background: var(--bg-card); color: var(--text-primary); padding: 0.625rem 1.25rem; }
+  .btn-outline:hover { border-color: rgba(225,59,43,0.3); background: var(--bg-chili-soft); }
+  .btn-ghost { background: transparent; color: var(--text-primary); padding: 0.625rem 1.25rem; }
+  .btn-ghost:hover { background: var(--bg-elevated); }
+  .btn-icon { width: 2.75rem; height: 2.75rem; padding: 0; border: 1px solid var(--border-default); background: var(--bg-card); color: var(--text-primary); border-radius: 0.75rem; }
+  .btn-icon:hover { border-color: rgba(225,59,43,0.3); }
+  .btn-icon-sm { width: 2.25rem; height: 2.25rem; padding: 0; border: 1px solid var(--border-default); background: var(--bg-card); color: var(--text-primary); border-radius: 0.5rem; font-size: 0.75rem; }
+  .btn-sm { height: 2.25rem; border-radius: 0.5rem; padding: 0 0.75rem; font-size: 0.75rem; }
+  .btn svg { width: 1rem; height: 1rem; flex-shrink: 0; }
+  .btn-icon svg { width: 1.125rem; height: 1.125rem; }
+
+  /* Dark mode toggle special state */
+  .btn-dark-toggle.active svg { color: var(--chili-500); }
+
+  /* ===== Main Layout ===== */
+  .main-content {
+    max-width: 80rem;
+    margin: 0 auto;
+    padding: 1.25rem 1rem 7rem;
+    display: grid;
+    gap: 1.5rem;
+  }
+  @media (min-width: 1024px) {
+    .main-content { padding: 1.75rem 1.5rem 2rem; grid-template-columns: 2fr 1fr; }
+  }
+
+  /* ===== Menu Hero ===== */
+  .menu-hero {
+    background: var(--charcoal-900);
+    border-radius: 1.5rem;
+    padding: 1.25rem;
+    color: #fff;
+    box-shadow: var(--shadow-card);
+    position: relative;
+    overflow: hidden;
+  }
+  @media (min-width: 640px) { .menu-hero { padding: 1.75rem; } }
+  .menu-hero::before {
+    content: '';
+    position: absolute;
+    right: -2.5rem; top: -5rem;
+    width: 14rem; height: 14rem;
+    border-radius: 50%;
+    background: rgba(225, 59, 43, 0.3);
+    filter: blur(60px);
+  }
+  .menu-hero-content { position: relative; display: flex; flex-direction: column; gap: 1.25rem; }
+  @media (min-width: 640px) { .menu-hero-content { flex-direction: row; align-items: flex-end; justify-content: space-between; } }
+  .hero-badge { display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; font-weight: 700; color: var(--amber-400); }
+  .hero-title { font-size: 1.75rem; font-weight: 800; margin-top: 0.5rem; }
+  @media (min-width: 640px) { .hero-title { font-size: 2.25rem; } }
+  .hero-diners { font-size: 0.8rem; color: var(--rice-200); margin-top: 0.5rem; }
+  .diner-avatars { display: flex; }
+  .diner-avatars span {
+    width: 2.25rem; height: 2.25rem;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 50%;
+    border: 2px solid var(--charcoal-900);
+    font-size: 0.75rem; font-weight: 700;
+    margin-left: -0.5rem;
+  }
+  .diner-avatars span:first-child { margin-left: 0; }
+  .diner-1 { background: var(--chili-500); color: #fff; }
+  .diner-2 { background: var(--amber-400); color: var(--charcoal-900); }
+  .diner-3 { background: var(--rice-200); color: var(--charcoal-900); }
+
+  /* ===== Search & Categories ===== */
+  .search-bar {
+    position: sticky;
+    top: 5rem;
+    z-index: 20;
+    margin-top: 1.25rem;
+    padding-bottom: 0.75rem;
+  }
+  .search-input-wrap { position: relative; }
+  .search-input-wrap svg { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-secondary); width: 1.125rem; height: 1.125rem; }
+  .search-input {
+    height: 3rem;
+    width: 100%;
+    border-radius: 1rem;
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-input);
+    padding-left: 2.75rem;
+    padding-right: 1rem;
+    font-size: 0.875rem;
+    color: var(--text-primary);
+    outline: none;
+    font-family: inherit;
+    box-shadow: var(--shadow-card);
+  }
+  .search-input::placeholder { color: var(--text-secondary); }
+  .search-input:focus { border-color: rgba(225,59,43,0.3); box-shadow: 0 0 0 4px var(--bg-chili-soft); }
+  .category-tabs { display: flex; gap: 0.5rem; overflow-x: auto; margin-top: 0.75rem; padding-bottom: 0.25rem; scrollbar-width: none; }
+  .category-tabs::-webkit-scrollbar { display: none; }
+  .cat-tab {
+    white-space: nowrap;
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    transition: all 200ms;
+    font-family: inherit;
+  }
+  .cat-tab.active { background: var(--chili-500); color: #fff; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+  .cat-tab:not(.active) { background: var(--bg-card); color: var(--text-secondary); }
+  .cat-tab:not(.active):hover { color: var(--chili-500); }
+
+  /* ===== Product Cards ===== */
+  .product-grid { display: grid; gap: 1rem; margin-top: 0.75rem; }
+  @media (min-width: 640px) { .product-grid { grid-template-columns: repeat(2, 1fr); } }
+  .product-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 1.5rem;
+    overflow: hidden;
+    box-shadow: var(--shadow-card);
+    transition: transform 200ms;
+  }
+  .product-card:hover { transform: translateY(-4px); }
+  .product-img-wrap { position: relative; height: 10rem; overflow: hidden; }
+  .product-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
+  .product-img-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(33,31,28,0.45), transparent); }
+  .product-badge {
+    position: absolute; left: 0.75rem; top: 0.75rem;
+    background: var(--amber-400); color: var(--charcoal-900);
+    padding: 0.25rem 0.75rem; border-radius: 9999px;
+    font-size: 0.7rem; font-weight: 800;
+  }
+  .product-ordered {
+    position: absolute; bottom: 0.75rem; left: 0.75rem;
+    display: flex; align-items: center; gap: 0.25rem;
+    background: rgba(255,255,255,0.9); color: var(--chili-600);
+    padding: 0.25rem 0.5rem; border-radius: 9999px;
+    font-size: 0.7rem; font-weight: 700;
+  }
+  .product-body { padding: 1rem; }
+  .product-name { font-weight: 800; color: var(--text-primary); font-size: 0.95rem; }
+  .product-desc { font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .product-bottom { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75rem; margin-top: 1rem; }
+  .product-price { font-size: 1.25rem; font-weight: 800; color: var(--chili-500); }
+  .product-price small { font-size: 0.75rem; font-weight: 500; color: var(--text-secondary); }
+  .add-btn {
+    width: 2.5rem; height: 2.5rem;
+    border-radius: 50%;
+    background: var(--chili-500); color: #fff;
+    border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: all 200ms;
+  }
+  .add-btn:hover { background: var(--chili-600); }
+  .add-btn:active { transform: scale(0.95); }
+
+  /* ===== Cart Panel (Sidebar) ===== */
+  .cart-panel {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 1.5rem;
+    padding: 1.25rem;
+    box-shadow: var(--shadow-card);
+  }
+  .cart-title { font-weight: 800; font-size: 1rem; color: var(--text-primary); }
+  .cart-meta { font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem; }
+  .cart-item { display: flex; gap: 0.75rem; padding: 0.75rem 0; border-bottom: 1px solid var(--border-subtle); }
+  .cart-item:last-child { border-bottom: none; }
+  .cart-item img { width: 4rem; height: 4rem; border-radius: 0.75rem; object-fit: cover; }
+  .cart-item-info { flex: 1; min-width: 0; }
+  .cart-item-name { font-weight: 700; color: var(--text-primary); font-size: 0.875rem; }
+  .cart-item-spec { font-size: 0.7rem; color: var(--text-secondary); margin-top: 0.15rem; }
+  .cart-item-bottom { display: flex; align-items: center; justify-content: space-between; margin-top: 0.5rem; }
+  .cart-item-price { font-weight: 700; color: var(--text-primary); font-size: 0.875rem; }
+  .qty-control { display: flex; align-items: center; gap: 0.5rem; }
+  .qty-btn {
+    width: 1.75rem; height: 1.75rem;
+    border-radius: 50%;
+    border: 1px solid var(--border-default);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.875rem;
+    font-family: inherit;
+  }
+  .qty-btn:hover { border-color: var(--chili-500); color: var(--chili-500); }
+  .qty-num { font-weight: 700; color: var(--text-primary); font-size: 0.875rem; min-width: 1.5rem; text-align: center; }
+  .cart-subtotal { display: flex; justify-content: space-between; margin-top: 0.75rem; font-size: 0.8rem; color: var(--text-secondary); }
+  .cart-total { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 0.5rem; }
+  .cart-total-label { font-size: 0.875rem; color: var(--text-secondary); }
+  .cart-total-value { font-size: 1.5rem; font-weight: 800; color: var(--chili-500); }
+  .collab-box {
+    margin-top: 1rem;
+    border-radius: 1rem;
+    border: 1px solid rgba(245,184,63,0.3);
+    background: var(--bg-amber-soft);
+    padding: 1rem;
+    font-size: 0.8rem;
+  }
+  .collab-box p:first-child { font-weight: 700; color: var(--text-primary); }
+  .collab-box p:last-child { color: var(--text-secondary); margin-top: 0.25rem; line-height: 1.5; }
+
+  /* ===== Bottom Nav (Mobile) ===== */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    z-index: 30;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border-top: 1px solid var(--border-subtle);
+    background: var(--bg-nav);
+    backdrop-filter: blur(16px);
+    padding: 0.5rem 0.5rem 0;
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  }
+  @media (min-width: 1024px) { .bottom-nav { display: none; } }
+  .nav-item {
+    display: flex; flex-direction: column; align-items: center; gap: 0.25rem;
+    padding: 0.5rem; border-radius: 0.75rem;
+    border: none; background: none; cursor: pointer;
+    font-size: 0.7rem; font-weight: 600; font-family: inherit;
+    color: var(--text-secondary);
+    transition: all 200ms;
+    position: relative;
+  }
+  .nav-item.active { background: var(--bg-chili-soft); color: var(--chili-500); }
+  .nav-item svg { width: 1.25rem; height: 1.25rem; }
+  .nav-badge {
+    position: absolute; right: 1rem; top: 0.25rem;
+    width: 1rem; height: 1rem; min-width: 1rem;
+    border-radius: 50%; background: var(--chili-500); color: #fff;
+    font-size: 0.65rem; display: flex; align-items: center; justify-content: center;
+  }
+
+  /* ===== Toast ===== */
+  .toast {
+    position: fixed;
+    left: 50%; top: 6rem;
+    transform: translateX(-50%);
+    z-index: 40;
+    background: var(--bg-toast);
+    color: var(--text-toast);
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    box-shadow: var(--shadow-float);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 250ms;
+  }
+  .toast.show { opacity: 1; }
+
+  /* ===== Info Banner ===== */
+  .info-banner {
+    background: var(--bg-card);
+    border: 1px solid var(--border-default);
+    border-radius: 1rem;
+    padding: 0.75rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 1.25rem;
+  }
+  .info-banner svg { color: var(--chili-500); flex-shrink: 0; }
+  .info-banner strong { color: var(--text-primary); }
+
+  /* ===== Views Container ===== */
+  .view-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+  }
+  .view-tab {
+    padding: 0.5rem 1rem;
+    border-radius: 0.75rem;
+    border: 1px solid var(--border-default);
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 200ms;
+  }
+  .view-tab.active { background: var(--chili-500); color: #fff; border-color: var(--chili-500); }
+
+  /* ===== Order View ===== */
+  .order-grid { display: grid; gap: 1.25rem; }
+  @media (min-width: 1024px) { .order-grid { grid-template-columns: 2fr 3fr; } }
+  .order-progress-card {
+    background: var(--charcoal-900);
+    border-radius: 1.5rem;
+    padding: 1.25rem;
+    color: #fff;
+    box-shadow: var(--shadow-card);
+  }
+  .progress-header { display: flex; align-items: center; justify-content: space-between; }
+  .progress-header h3 { font-weight: 700; font-size: 0.95rem; }
+  .progress-live { display: flex; align-items: center; gap: 0.25rem; background: rgba(255,255,255,0.1); padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.7rem; color: var(--amber-400); }
+  .progress-step { display: flex; gap: 1rem; padding-bottom: 1.75rem; position: relative; }
+  .progress-step:last-child { padding-bottom: 0; }
+  .progress-step::before {
+    content: ''; position: absolute; left: 1rem; top: 2rem; bottom: 0; width: 1px;
+    background: rgba(255,255,255,0.15);
+  }
+  .progress-step.active::before { background: var(--amber-400); }
+  .progress-step:last-child::before { display: none; }
+  .progress-icon {
+    width: 2rem; height: 2rem; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; z-index: 1; position: relative;
+    background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.4);
+  }
+  .progress-step.active .progress-icon { background: var(--amber-400); color: var(--charcoal-900); }
+  .progress-label { font-weight: 700; font-size: 0.875rem; }
+  .progress-step.active .progress-label { color: #fff; }
+  .progress-step:not(.active) .progress-label { color: rgba(255,255,255,0.4); }
+  .progress-note { font-size: 0.7rem; margin-top: 0.25rem; }
+  .progress-step.active .progress-note { color: var(--rice-200); }
+  .progress-step:not(.active) .progress-note { color: rgba(255,255,255,0.3); }
+  .order-items-card { background: var(--bg-card); border-radius: 1.5rem; padding: 1.25rem; box-shadow: var(--shadow-card); }
+  .order-item-row { display: flex; gap: 0.75rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-subtle); margin-bottom: 1rem; }
+  .order-item-row:last-child { border-bottom: none; margin-bottom: 0; }
+  .order-item-row img { width: 4rem; height: 4rem; border-radius: 0.75rem; object-fit: cover; }
+  .order-total-bar { display: flex; align-items: center; justify-content: space-between; background: var(--bg-elevated); border-radius: 1rem; padding: 1rem; margin-top: 0.75rem; }
+
+  /* ===== Checkout View ===== */
+  .checkout-grid { display: grid; gap: 1.25rem; }
+  @media (min-width: 1024px) { .checkout-grid { grid-template-columns: 3fr 2fr; } }
+  .checkout-card { background: var(--bg-card); border-radius: 1.5rem; padding: 1.25rem; box-shadow: var(--shadow-card); }
+  .checkout-line { display: flex; justify-content: space-between; font-size: 0.875rem; padding: 0.25rem 0; }
+  .pay-method { display: flex; align-items: center; gap: 0.75rem; border: 1px solid var(--border-subtle); border-radius: 1rem; padding: 1rem; cursor: pointer; transition: all 200ms; background: var(--bg-elevated); }
+  .pay-method.selected { border-color: var(--chili-500); background: var(--bg-chili-soft); }
+  .pay-method-icon { background: var(--bg-card); padding: 0.5rem; border-radius: 0.75rem; color: var(--chili-500); display: flex; }
+
+  /* ===== Home View ===== */
+  .home-view { position: relative; min-height: 100vh; overflow: hidden; }
+  .home-blur-1 { position: absolute; right: -6rem; top: -6rem; width: 18rem; height: 18rem; border-radius: 50%; background: var(--bg-blur-1); filter: blur(48px); }
+  .home-blur-2 { position: absolute; bottom: -6rem; left: -5rem; width: 18rem; height: 18rem; border-radius: 50%; background: var(--bg-blur-2); filter: blur(48px); }
+  .home-content { position: relative; max-width: 72rem; margin: 0 auto; display: grid; gap: 2.5rem; align-items: center; min-height: 100vh; padding: 2.5rem 1.25rem; }
+  @media (min-width: 1024px) { .home-content { grid-template-columns: 1fr 1fr; padding: 2.5rem; } }
+  .home-badge { display: inline-flex; align-items: center; gap: 0.5rem; border: 1px solid rgba(225,59,43,0.2); background: var(--bg-card); padding: 0.5rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 700; color: var(--chili-600); box-shadow: var(--shadow-card); margin-bottom: 1.75rem; }
+  .home-en { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em; color: var(--chili-500); margin-bottom: 0.75rem; }
+  .home-title { font-size: 2.25rem; font-weight: 800; line-height: 1.15; color: var(--text-primary); }
+  @media (min-width: 640px) { .home-title { font-size: 3rem; } }
+  @media (min-width: 1024px) { .home-title { font-size: 3.75rem; } }
+  .home-title .accent { color: var(--chili-500); }
+  .home-desc { margin-top: 1.25rem; max-width: 30rem; font-size: 0.95rem; line-height: 1.75; color: var(--text-secondary); }
+  .home-features { margin-top: 1.75rem; display: flex; flex-wrap: wrap; gap: 0.75rem; font-size: 0.8rem; color: var(--text-primary); }
+  .home-feature { display: flex; align-items: center; gap: 0.5rem; background: var(--bg-card); padding: 0.5rem 0.75rem; border-radius: 9999px; box-shadow: var(--shadow-card); }
+  .home-feature svg { color: var(--chili-500); width: 0.9rem; height: 0.9rem; }
+  .home-card { background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 1.5rem; padding: 1rem; box-shadow: var(--shadow-float); }
+  @media (min-width: 640px) { .home-card { padding: 1.5rem; } }
+  .home-img-wrap { position: relative; height: 12rem; overflow: hidden; border-radius: 1rem; margin-bottom: 1.5rem; }
+  @media (min-width: 640px) { .home-img-wrap { height: 14rem; } }
+  .home-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
+  .home-img-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(33,31,28,0.7), transparent); }
+  .home-img-info { position: absolute; bottom: 1rem; left: 1rem; right: 1rem; display: flex; align-items: flex-end; justify-content: space-between; color: #fff; }
+  .home-qr-box { display: flex; align-items: center; gap: 0.75rem; background: var(--bg-elevated); border-radius: 1rem; padding: 1rem; margin-bottom: 1rem; }
+  .home-qr-icon { background: var(--bg-card); padding: 0.75rem; border-radius: 0.75rem; color: var(--chili-500); display: flex; }
+  .home-tables { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+  .home-table-btn {
+    border: 1px solid var(--border-default); background: var(--bg-card);
+    border-radius: 1rem; padding: 1rem; text-align: left; cursor: pointer;
+    transition: all 200ms; font-family: inherit;
+  }
+  .home-table-btn:hover { transform: translateY(-4px); border-color: var(--chili-500); box-shadow: var(--shadow-card); }
+  .home-table-num { display: flex; align-items: center; justify-content: center; width: 2rem; height: 2rem; border-radius: 0.5rem; background: var(--bg-elevated); color: var(--chili-500); font-size: 0.8rem; font-weight: 800; margin-bottom: 0.75rem; }
+  .home-table-code { font-weight: 700; color: var(--text-primary); font-size: 0.875rem; }
+  .home-table-seats { display: flex; align-items: center; gap: 0.25rem; font-size: 0.7rem; color: var(--text-secondary); margin-top: 0.25rem; }
+
+  /* SVG icons inline */
+  .icon { display: inline-flex; }
+</style>
+</head>
+<body>
+
+<!-- Banner -->
+<div class="banner">概念演示 / 非官方 · 仅用于服务流程原型展示</div>
+
+<!-- TopBar -->
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand-logo" onclick="switchView('menu')">
+      <span class="brand-icon">沸</span>
+      <span style="display:none" class="brand-info-mobile">
+        <strong class="brand-name">沸点</strong>
+        <small class="brand-sub">火锅点单</small>
+      </span>
+    </div>
+    <span class="table-badge">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C8 2 5 5 5 9c0 5 7 13 7 13s7-8 7-13c0-4-3-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+      A08 · 大厅
+    </span>
+    <div class="topbar-nav">
+      <div class="topbar-nav-desktop">
+        <button class="btn btn-ghost btn-sm" onclick="switchView('menu')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          点餐
+        </button>
+        <button class="btn btn-ghost btn-sm" onclick="switchView('order')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17.5v-11"/></svg>
+          订单
+        </button>
+      </div>
+      <button class="btn btn-icon" aria-label="呼叫服务">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      </button>
+      <button class="btn btn-icon" aria-label="会员与排号">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </button>
+      <button class="btn btn-icon" aria-label="演示控制台">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+      </button>
+      <button class="btn btn-icon" aria-label="切换至老人模式" onclick="toggleElderly()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="16" cy="4" r="1"/><path d="M19 11V6a2 2 0 0 0-2-2v1a2 2 0 0 0-2 2v4"/><path d="M9 11V7a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v4"/><path d="M5 11h14"/><path d="M9 11v6"/><path d="M15 11v6"/><path d="M9 17h6"/></svg>
+      </button>
+      <!-- Dark Mode Toggle Button -->
+      <button class="btn btn-icon btn-dark-toggle" id="darkToggle" aria-label="切换黑夜模式" onclick="toggleDark()">
+        <svg id="moonIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+        <svg id="sunIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+      </button>
+      <button class="btn btn-outline btn-sm" aria-label="切换语言" onclick="toggleLang()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>
+        <span id="langLabel">EN</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- View Switcher -->
+<div style="max-width:80rem;margin:0 auto;padding:1.25rem 1rem 0;">
+  <div class="view-tabs">
+    <button class="view-tab active" data-view="menu" onclick="switchView('menu')">📋 菜单视图</button>
+    <button class="view-tab" data-view="order" onclick="switchView('order')">📝 订单视图</button>
+    <button class="view-tab" data-view="checkout" onclick="switchView('checkout')">💳 结账视图</button>
+    <button class="view-tab" data-view="home" onclick="switchView('home')">🏠 首页视图</button>
+  </div>
+  <div class="info-banner" id="darkModeBanner" style="display:none;">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+    <span><strong>黑夜模式已启用</strong> — 所有界面元素已适配深色主题，点击顶栏太阳图标切换回浅色模式。</span>
+  </div>
+</div>
+
+<!-- ===== MENU VIEW ===== -->
+<div id="view-menu" class="main-content paper-noise">
+  <div>
+    <!-- Hero -->
+    <div class="menu-hero">
+      <div class="menu-hero-content">
+        <div>
+          <span class="hero-badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>
+            今日好味已备齐
+          </span>
+          <h1 class="hero-title">想吃什么，一起点。</h1>
+          <p class="hero-diners">本桌已有 3 位朋友加入协同点餐</p>
+        </div>
+        <div class="diner-avatars">
+          <span class="diner-1">姚</span>
+          <span class="diner-2">李</span>
+          <span class="diner-3">王</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search & Categories -->
+    <div class="search-bar">
+      <div class="search-input-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input class="search-input" placeholder="搜索锅底、菜品或饮品">
+      </div>
+      <div class="category-tabs">
+        <button class="cat-tab active">推荐</button>
+        <button class="cat-tab">锅底</button>
+        <button class="cat-tab">牛羊肉</button>
+        <button class="cat-tab">海鲜河鲜</button>
+        <button class="cat-tab">蔬菜豆品</button>
+        <button class="cat-tab">主食饮品</button>
+      </div>
+    </div>
+
+    <!-- Products -->
+    <div class="product-grid">
+      <div class="product-card">
+        <div class="product-img-wrap">
+          <img src="https://images.unsplash.com/photo-1582625311946-2c0c0e9d4e80?w=400" alt="鎏金番茄鸳鸯锅">
+          <div class="product-img-overlay"></div>
+          <span class="product-badge">人气 No.1</span>
+          <span class="product-ordered">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+            本桌已点 2
+          </span>
+        </div>
+        <div class="product-body">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:0.75rem;">
+            <div>
+              <h3 class="product-name">鎏金番茄鸳鸯锅</h3>
+              <p class="product-desc">慢熬番茄与醇香牛油，一锅双味</p>
+            </div>
+            <button class="add-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5v14"/></svg></button>
+          </div>
+          <p class="product-price" style="margin-top:1rem;">¥88 <small>起</small></p>
+        </div>
+      </div>
+
+      <div class="product-card">
+        <div class="product-img-wrap">
+          <img src="https://images.unsplash.com/photo-1552566626-52f8b828add9?w=400" alt="琥珀嫩牛肉">
+          <div class="product-img-overlay"></div>
+          <span class="product-badge">招牌</span>
+        </div>
+        <div class="product-body">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:0.75rem;">
+            <div>
+              <h3 class="product-name">琥珀嫩牛肉</h3>
+              <p class="product-desc">鲜切嫩牛肉，涮煮约 30 秒</p>
+            </div>
+            <button class="add-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5v14"/></svg></button>
+          </div>
+          <p class="product-price" style="margin-top:1rem;">¥48 <small>起</small></p>
+        </div>
+      </div>
+
+      <div class="product-card">
+        <div class="product-img-wrap">
+          <img src="https://images.unsplash.com/photo-1544025162-d76694265947?w=400" alt="雪花肥牛卷">
+          <div class="product-img-overlay"></div>
+          <span class="product-badge">主厨推荐</span>
+        </div>
+        <div class="product-body">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:0.75rem;">
+            <div>
+              <h3 class="product-name">雪花肥牛卷</h3>
+              <p class="product-desc">脂香均匀，鲜嫩不腻</p>
+            </div>
+            <button class="add-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5v14"/></svg></button>
+          </div>
+          <p class="product-price" style="margin-top:1rem;">¥58 <small>起</small></p>
+        </div>
+      </div>
+
+      <div class="product-card">
+        <div class="product-img-wrap">
+          <img src="https://images.unsplash.com/photo-1606755962773-d324e0a13086?w=400" alt="田园蔬菜拼盘">
+          <div class="product-img-overlay"></div>
+          <span class="product-badge">新品</span>
+        </div>
+        <div class="product-body">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:0.75rem;">
+            <div>
+              <h3 class="product-name">田园蔬菜拼盘</h3>
+              <p class="product-desc">时令鲜蔬，清甜爽口</p>
+            </div>
+            <button class="add-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5v14"/></svg></button>
+          </div>
+          <p class="product-price" style="margin-top:1rem;">¥38 <small>起</small></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cart Sidebar -->
+  <aside>
+    <div style="position:sticky;top:7rem;">
+      <div class="cart-panel">
+        <h2 class="cart-title">本桌购物车</h2>
+        <p class="cart-meta">共 2 份菜品 · 3 人参与</p>
+        <div style="margin-top:0.75rem;">
+          <div class="cart-item">
+            <img src="https://images.unsplash.com/photo-1582625311946-2c0c0e9d4e80?w=200" alt="锅">
+            <div class="cart-item-info">
+              <p class="cart-item-name">鎏金番茄鸳鸯锅</p>
+              <p class="cart-item-spec">整份 · 番茄+牛油 · 微辣</p>
+              <div class="cart-item-bottom">
+                <span class="cart-item-price">¥88</span>
+                <div class="qty-control">
+                  <button class="qty-btn">−</button>
+                  <span class="qty-num">1</span>
+                  <button class="qty-btn">+</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="cart-item">
+            <img src="https://images.unsplash.com/photo-1552566626-52f8b828add9?w=200" alt="牛肉">
+            <div class="cart-item-info">
+              <p class="cart-item-name">琥珀嫩牛肉</p>
+              <p class="cart-item-spec">整份 · 原味</p>
+              <div class="cart-item-bottom">
+                <span class="cart-item-price">¥48</span>
+                <div class="qty-control">
+                  <button class="qty-btn">−</button>
+                  <span class="qty-num">1</span>
+                  <button class="qty-btn">+</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="cart-subtotal"><span>菜品小计</span><span>¥136</span></div>
+        <div class="cart-total"><span class="cart-total-label">预估合计</span><span class="cart-total-value">¥136</span></div>
+        <button class="btn btn-default" style="width:100%;margin-top:1rem;">确认并提交订单</button>
+      </div>
+      <div class="collab-box">
+        <p>多人协同提示</p>
+        <p>同桌伙伴点过的菜会显示"本桌已点"，帮助减少重复下单。</p>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<!-- ===== ORDER VIEW ===== -->
+<div id="view-order" class="main-content" style="display:none;max-width:64rem;">
+  <div>
+    <div style="display:flex;flex-direction:column;gap:0.75rem;justify-content:space-between;">
+      <div>
+        <p style="font-size:0.8rem;font-weight:700;color:var(--chili-500);">TABLE ORDER · 桌台订单</p>
+        <h1 style="font-size:1.75rem;font-weight:800;color:var(--text-primary);margin-top:0.25rem;">这一锅，正在抵达</h1>
+      </div>
+    </div>
+    <div class="order-grid" style="margin-top:1.5rem;">
+      <section class="order-progress-card">
+        <div class="progress-header">
+          <h3>履约进度</h3>
+          <span class="progress-live">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            实时同步
+          </span>
+        </div>
+        <div style="margin-top:1.5rem;">
+          <div class="progress-step active" style="display:flex;gap:1rem;padding-bottom:1.75rem;position:relative;">
+            <span class="progress-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/></svg></span>
+            <div><p class="progress-label">订单已提交</p><p class="progress-note">19:28</p></div>
+          </div>
+          <div class="progress-step active" style="display:flex;gap:1rem;padding-bottom:1.75rem;position:relative;">
+            <span class="progress-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg></span>
+            <div><p class="progress-label">后厨已接单</p><p class="progress-note">预计 2 分钟</p></div>
+          </div>
+          <div class="progress-step active" style="display:flex;gap:1rem;padding-bottom:1.75rem;position:relative;">
+            <span class="progress-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6Z"/></svg></span>
+            <div><p class="progress-label">正在制作</p><p class="progress-note">预计 8–12 分钟</p></div>
+          </div>
+          <div class="progress-step" style="display:flex;gap:1rem;position:relative;">
+            <span class="progress-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg></span>
+            <div><p class="progress-label">菜品已上桌</p><p class="progress-note">等待前序完成</p></div>
+          </div>
+        </div>
+      </section>
+      <section class="order-items-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div><h2 style="font-size:1.1rem;font-weight:800;color:var(--text-primary);">已点菜品</h2><p style="font-size:0.7rem;color:var(--text-secondary);margin-top:0.25rem;">订单号 #FD20260817018</p></div>
+          <span style="background:var(--bg-chili-soft);color:var(--chili-600);padding:0.25rem 0.75rem;border-radius:9999px;font-size:0.7rem;font-weight:700;">2 项</span>
+        </div>
+        <div style="margin-top:1.25rem;">
+          <div class="order-item-row">
+            <img src="https://images.unsplash.com/photo-1582625311946-2c0c0e9d4e80?w=200" alt="锅">
+            <div style="flex:1;">
+              <div style="display:flex;justify-content:space-between;gap:0.75rem;">
+                <p style="font-weight:700;color:var(--text-primary);font-size:0.875rem;">鎏金番茄鸳鸯锅 <span style="font-weight:400;color:var(--text-secondary);">× 1</span></p>
+                <strong style="color:var(--text-primary);">¥88</strong>
+              </div>
+              <p style="font-size:0.7rem;color:var(--text-secondary);margin-top:0.25rem;">整份 · 番茄+牛油 · 微辣 · 姚乾 点了</p>
+              <div style="margin-top:0.5rem;display:flex;align-items:center;justify-content:space-between;">
+                <span style="background:var(--bg-amber-soft);padding:0.25rem 0.5rem;border-radius:9999px;font-size:0.7rem;font-weight:700;color:var(--text-primary);">正在制作</span>
+              </div>
+            </div>
+          </div>
+          <div class="order-item-row">
+            <img src="https://images.unsplash.com/photo-1552566626-52f8b828add9?w=200" alt="牛肉">
+            <div style="flex:1;">
+              <div style="display:flex;justify-content:space-between;gap:0.75rem;">
+                <p style="font-weight:700;color:var(--text-primary);font-size:0.875rem;">琥珀嫩牛肉 <span style="font-weight:400;color:var(--text-secondary);">× 1</span></p>
+                <strong style="color:var(--text-primary);">¥48</strong>
+              </div>
+              <p style="font-size:0.7rem;color:var(--text-secondary);margin-top:0.25rem;">整份 · 原味 · 李 点了</p>
+              <div style="margin-top:0.5rem;display:flex;align-items:center;justify-content:space-between;">
+                <span style="background:var(--bg-amber-soft);padding:0.25rem 0.5rem;border-radius:9999px;font-size:0.7rem;font-weight:700;color:var(--text-primary);">正在制作</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="order-total-bar">
+          <span><small style="display:block;color:var(--text-secondary);font-size:0.75rem;">菜品合计</small><strong style="font-size:1.25rem;color:var(--chili-500);">¥136</strong></span>
+          <button class="btn btn-default">去结账</button>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CHECKOUT VIEW ===== -->
+<div id="view-checkout" class="main-content" style="display:none;max-width:64rem;">
+  <div>
+    <button class="btn btn-ghost" style="margin-bottom:1.25rem;font-size:0.8rem;" onclick="switchView('order')">← 返回订单</button>
+    <div class="checkout-grid">
+      <section class="checkout-card">
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+          <span style="background:var(--bg-chili-soft);padding:0.75rem;border-radius:0.75rem;color:var(--chili-500);display:flex;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/></svg>
+          </span>
+          <div><p style="font-size:0.75rem;font-weight:700;color:var(--chili-500);">CHECKOUT</p><h1 style="font-size:1.5rem;font-weight:800;color:var(--text-primary);">核对本桌账单</h1></div>
+        </div>
+        <div style="margin-top:1.5rem;">
+          <div class="checkout-line"><span style="color:var(--text-primary);">鎏金番茄鸳鸯锅 <small style="color:var(--text-secondary);">× 1</small></span><span style="font-weight:600;color:var(--text-primary);">¥88</span></div>
+          <div class="checkout-line"><span style="color:var(--text-primary);">琥珀嫩牛肉 <small style="color:var(--text-secondary);">× 1</small></span><span style="font-weight:600;color:var(--text-primary);">¥48</span></div>
+        </div>
+        <div style="margin-top:1.25rem;border-top:1px dashed var(--border-default);padding-top:1rem;">
+          <div class="checkout-line"><span style="color:var(--text-secondary);">菜品小计</span><span style="color:var(--text-secondary);">¥136</span></div>
+          <div class="checkout-line" style="color:var(--chili-500);"><span style="display:flex;align-items:center;gap:0.5rem;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/></svg>会员菜品券</span><span>-¥30</span></div>
+          <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-top:1rem;color:var(--text-primary);"><strong>应付合计</strong><strong style="font-size:1.75rem;color:var(--chili-500);">¥106</strong></div>
+        </div>
+      </section>
+      <section class="checkout-card">
+        <h2 style="font-weight:800;color:var(--text-primary);font-size:1rem;">选择支付方式</h2>
+        <div style="margin-top:1rem;display:flex;flex-direction:column;gap:0.75rem;">
+          <div class="pay-method selected">
+            <span class="pay-method-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg></span>
+            <span style="flex:1;"><strong style="display:block;font-size:0.875rem;color:var(--text-primary);">移动支付</strong><small style="color:var(--text-secondary);">微信 / 支付宝</small></span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--chili-500)" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+          </div>
+          <div class="pay-method">
+            <span class="pay-method-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg></span>
+            <span style="flex:1;"><strong style="display:block;font-size:0.875rem;color:var(--text-primary);">桌边 POS</strong><small style="color:var(--text-secondary);">服务员到桌协助</small></span>
+          </div>
+        </div>
+        <button class="btn btn-default" style="width:100%;margin-top:1.25rem;">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
+          确认支付 ¥106
+        </button>
+      </section>
+    </div>
+  </div>
+</div>
+
+<!-- ===== HOME VIEW ===== -->
+<div id="view-home" class="home-view paper-noise" style="display:none;">
+  <div class="home-blur-1"></div>
+  <div class="home-blur-2"></div>
+  <div class="home-content">
+    <section>
+      <div class="home-badge">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>
+        概念演示 / 非官方
+      </div>
+      <p class="home-en">BOILING MOMENT · 沸点</p>
+      <h1 class="home-title">热气升腾，<br><span class="accent">好味即刻开场。</span></h1>
+      <p class="home-desc">从桌台绑定、多人协同点餐，到后厨履约与结账，一次完整走通火锅门店数字服务。</p>
+      <div class="home-features">
+        <span class="home-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>多人同步点餐</span>
+        <span class="home-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>履约状态可视</span>
+        <span class="home-feature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>桌边服务呼叫</span>
+      </div>
+    </section>
+    <section class="home-card">
+      <div class="home-img-wrap">
+        <img src="https://images.unsplash.com/photo-1582625311946-2c0c0e9d4e80?w=600" alt="热气腾腾的火锅菜品">
+        <div class="home-img-overlay"></div>
+        <div class="home-img-info">
+          <div><p style="font-size:0.7rem;opacity:0.8;">模拟门店</p><h2 style="font-size:1.25rem;font-weight:700;">沸点 · 星河里店</h2></div>
+          <span style="background:rgba(255,255,255,0.2);padding:0.25rem 0.75rem;border-radius:9999px;font-size:0.7rem;backdrop-filter:blur(8px);">营业中</span>
+        </div>
+      </div>
+      <div class="home-qr-box">
+        <span class="home-qr-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="5" height="5" x="3" y="3" rx="1"/><path d="M7 3h7"/><path d="M3 7v7"/><rect width="5" height="5" x="16" y="3" rx="1"/><path d="M16 7v3"/><path d="M7 16h3"/><rect width="5" height="5" x="16" y="16" rx="1"/><path d="M16 19h-2"/><path d="M19 16v-3"/></svg></span>
+        <div style="flex:1;min-width:0;"><p style="font-weight:700;color:var(--text-primary);font-size:0.875rem;">已识别桌台二维码</p><p style="font-size:0.75rem;color:var(--text-secondary);">请选择桌台，模拟扫码绑定</p></div>
+      </div>
+      <div class="home-tables">
+        <button class="home-table-btn">
+          <span class="home-table-num">1</span>
+          <p class="home-table-code">A08 · 大厅</p>
+          <p class="home-table-seats"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> 可坐 4 人</p>
+        </button>
+        <button class="home-table-btn">
+          <span class="home-table-num">2</span>
+          <p class="home-table-code">B12 · 卡座</p>
+          <p class="home-table-seats"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg> 可坐 6 人</p>
+        </button>
+      </div>
+      <button class="btn btn-default" style="width:100%;margin-top:1rem;">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C8 2 5 5 5 9c0 5 7 13 7 13s7-8 7-13c0-4-3-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+        快速进入 A08 桌
+      </button>
+    </section>
+  </div>
+</div>
+
+<!-- Bottom Nav -->
+<nav class="bottom-nav">
+  <button class="nav-item active" onclick="switchView('menu')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+    点餐
+  </button>
+  <button class="nav-item" onclick="switchView('order')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/></svg>
+    订单
+  </button>
+  <button class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+    服务
+  </button>
+  <button class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+    演示
+  </button>
+</nav>
+
+<!-- Toast -->
+<div class="toast" id="toast">已切换为黑夜模式</div>
+
+<script>
+  // ===== Dark Mode Toggle =====
+  function toggleDark() {
+    const html = document.documentElement;
+    const isDark = html.classList.toggle('dark');
+    const moonIcon = document.getElementById('moonIcon');
+    const sunIcon = document.getElementById('sunIcon');
+    const btn = document.getElementById('darkToggle');
+    const banner = document.getElementById('darkModeBanner');
+
+    if (isDark) {
+      moonIcon.style.display = 'none';
+      sunIcon.style.display = 'block';
+      btn.classList.add('active');
+      banner.style.display = 'flex';
+      showToast('已切换为黑夜模式 🌙');
+    } else {
+      moonIcon.style.display = 'block';
+      sunIcon.style.display = 'none';
+      btn.classList.remove('active');
+      banner.style.display = 'none';
+      showToast('已切换为浅色模式 ☀️');
+    }
+
+    try { localStorage.setItem('dark-mode', isDark ? 'true' : 'false'); } catch(e) {}
+  }
+
+  // ===== Elderly Mode Toggle (demo) =====
+  function toggleElderly() {
+    const html = document.documentElement;
+    const isElderly = html.classList.toggle('elderly');
+    showToast(isElderly ? '已切换为老人模式' : '已切换为常规模式');
+    try { localStorage.setItem('elderly-mode', isElderly ? 'true' : 'false'); } catch(e) {}
+  }
+
+  // ===== Language Toggle (demo) =====
+  let currentLang = 'zh';
+  function toggleLang() {
+    currentLang = currentLang === 'zh' ? 'en' : 'zh';
+    document.getElementById('langLabel').textContent = currentLang === 'zh' ? 'EN' : '中';
+    showToast(currentLang === 'zh' ? '已切换为中文' : 'Switched to English');
+  }
+
+  // ===== View Switching =====
+  function switchView(view) {
+    const views = ['menu', 'order', 'checkout', 'home'];
+    views.forEach(v => {
+      const el = document.getElementById('view-' + v);
+      if (el) el.style.display = v === view ? (view === 'menu' ? 'grid' : view === 'home' ? 'block' : 'block') : 'none';
+    });
+    document.querySelectorAll('.view-tab').forEach(tab => {
+      tab.classList.toggle('active', tab.dataset.view === view);
+    });
+    // Update bottom nav
+    document.querySelectorAll('.bottom-nav .nav-item').forEach((item, idx) => {
+      const map = ['menu', 'order', '', ''];
+      item.classList.toggle('active', map[idx] === view);
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ===== Toast =====
+  let toastTimer;
+  function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 2000);
+  }
+
+  // ===== Init: Apply stored dark mode on load =====
+  (function init() {
+    try {
+      const darkMode = localStorage.getItem('dark-mode');
+      if (darkMode === 'true') {
+        document.documentElement.classList.add('dark');
+        document.getElementById('moonIcon').style.display = 'none';
+        document.getElementById('sunIcon').style.display = 'block';
+        document.getElementById('darkToggle').classList.add('active');
+        document.getElementById('darkModeBanner').style.display = 'flex';
+      }
+      const elderly = localStorage.getItem('elderly-mode');
+      if (elderly === 'true') {
+        document.documentElement.classList.add('elderly');
+      }
+    } catch(e) {}
+  })();
+
+  // ===== Category tabs =====
+  document.querySelectorAll('.cat-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+    });
+  });
+
+  // ===== Pay method selection =====
+  document.querySelectorAll('.pay-method').forEach(method => {
+    method.addEventListener('click', () => {
+      document.querySelectorAll('.pay-method').forEach(m => m.classList.remove('selected'));
+      method.classList.add('selected');
+    });
+  });
+</script>
+</body>
+</html>

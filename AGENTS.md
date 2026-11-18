@@ -71,6 +71,7 @@ playwright.config.ts       # E2E 配置
 | `npm run lint` | ESLint，零警告通过 |
 | `npx tsc -b --noEmit` | 仅类型检查 |
 | `npx playwright test` | E2E，webServer 自动拉起 `npm run dev` |
+| `npm run test` | Vitest 单元测试（`src/**/*.test.ts`），jsdom 环境 |
 
 E2E 的执行约束（浏览器来源、报告路径、批量修复、不重跑等）与用例编写/自审规范见 [docs/agent-testing.md](docs/agent-testing.md)。
 

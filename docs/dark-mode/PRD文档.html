@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PRD 文档：黑夜模式（Dark Mode）主题切换</title>
+<style>
+  :root {
+    --c-bg: #fffdf8;
+    --c-surface: #ffffff;
+    --c-text: #211f1c;
+    --c-text-sec: #5f5b55;
+    --c-border: #e0ded9;
+    --c-accent: #e13b2b;
+    --c-accent-bg: #fff1ef;
+    --c-amber: #f5b83f;
+    --c-amber-bg: #fff2c7;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    background: var(--c-bg);
+    color: var(--c-text);
+    line-height: 1.7;
+    padding: 2rem 1rem;
+  }
+  .container { max-width: 900px; margin: 0 auto; }
+  .header {
+    background: linear-gradient(135deg, #211f1c, #34312d);
+    color: #fffdf8;
+    padding: 2.5rem 2rem;
+    border-radius: 16px;
+    margin-bottom: 2rem;
+  }
+  .header h1 { font-size: 1.75rem; font-weight: 800; margin-bottom: 0.5rem; }
+  .header .subtitle { color: #f3e6d0; font-size: 0.95rem; }
+  .meta-table {
+    background: var(--c-surface);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border: 1px solid var(--c-border);
+  }
+  .meta-table table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  .meta-table td { padding: 0.3rem 0.5rem; border-bottom: 1px solid var(--c-border); }
+  .meta-table td:first-child { font-weight: 600; color: var(--c-text-sec); width: 140px; }
+  .meta-table tr:last-child td { border-bottom: none; }
+  section {
+    background: var(--c-surface);
+    border-radius: 12px;
+    padding: 1.5rem 2rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--c-border);
+  }
+  h2 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--c-accent);
+    color: var(--c-text);
+  }
+  h3 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin: 1rem 0 0.5rem;
+    color: var(--c-text);
+  }
+  p { margin-bottom: 0.5rem; color: var(--c-text); }
+  ul, ol { margin: 0.5rem 0 0.5rem 1.5rem; }
+  li { margin-bottom: 0.3rem; }
+  table { width: 100%; border-collapse: collapse; margin: 0.5rem 0; font-size: 0.85rem; }
+  th { background: var(--c-accent-bg); color: var(--c-accent); font-weight: 700; padding: 0.5rem; text-align: left; border: 1px solid var(--c-border); }
+  td { padding: 0.5rem; border: 1px solid var(--c-border); vertical-align: top; }
+  tr:nth-child(even) td { background: #fbf5ea; }
+  .req-card {
+    border-left: 4px solid var(--c-accent);
+    padding-left: 1rem;
+    margin: 1rem 0;
+  }
+  .req-id {
+    display: inline-block;
+    background: var(--c-accent);
+    color: white;
+    padding: 0.15rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+  }
+  .priority {
+    display: inline-block;
+    padding: 0.1rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-left: 0.5rem;
+  }
+  .priority-p0 { background: #ffe0e0; color: #c92f21; }
+  .priority-p1 { background: var(--c-amber-bg); color: #a9231a; }
+  .checklist { list-style: none; margin-left: 0; }
+  .checklist li::before { content: '☐ '; color: var(--c-accent); font-weight: bold; }
+  code {
+    background: #f3e6d0;
+    padding: 0.1rem 0.3rem;
+    border-radius: 3px;
+    font-size: 0.85rem;
+    font-family: 'SFMono-Regular', Consolas, monospace;
+  }
+  .footer {
+    text-align: center;
+    color: var(--c-text-sec);
+    font-size: 0.8rem;
+    padding: 1rem;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="header">
+  <h1>🌑 PRD 文档：黑夜模式（Dark Mode）主题切换</h1>
+  <p class="subtitle">为沸点火锅点单 Demo 应用新增黑夜模式主题切换能力，提升夜间及弱光环境下的视觉体验</p>
+</div>
+
+<div class="meta-table">
+  <table>
+    <tr><td>Spec ID</td><td>PRD-DARK-MODE-001</td></tr>
+    <tr><td>状态</td><td>draft</td></tr>
+    <tr><td>产品领域</td><td>用户体验 / 主题系统</td></tr>
+    <tr><td>创建时间</td><td>2026-11-18</td></tr>
+    <tr><td>来源文档</td><td>需求澄清文档.md、tokens.dark.json、DESIGN.md</td></tr>
+  </table>
+</div>
+
+<section>
+  <h2>1. 背景与目标</h2>
+  <h3>1.1 背景</h3>
+  <p>沸点火锅点单 Demo 当前为单一浅色主题，使用 rice/charcoal/chili/amber 色系硬编码在 JSX 中，Tailwind 未配置 <code>darkMode</code>，无 <code>dark:</code> 变体。</p>
+  <p>餐饮场景中晚间用餐高峰时段顾客在弱光环境下使用点单界面，浅色背景高亮度屏幕对眼睛刺激明显。设计系统已提供完整的暗色 token 方案（<code>tokens.dark.json</code>），可直接作为黑夜模式色彩基准。</p>
+  <p>应用已有「老人模式」作为主题切换先例（<code>useElderlyMode</code> hook），黑夜模式可采用相同架构。</p>
+
+  <h3>1.2 目标</h3>
+  <table>
+    <tr><th>目标</th><th>衡量方式</th><th>目标值 / 判断标准</th></tr>
+    <tr><td>提供黑夜模式切换入口</td><td>顶栏存在可见的切换按钮</td><td>用户可在任意视图顶栏找到黑夜模式切换按钮</td></tr>
+    <tr><td>全视图深色适配</td><td>视觉检查所有视图</td><td>5 个视图及所有弹窗在暗色下无浅色残留</td></tr>
+    <tr><td>偏好持久化</td><td>刷新页面后保持主题</td><td>用户切换后刷新，主题保持不变</td></tr>
+    <tr><td>平滑过渡</td><td>切换时的视觉体验</td><td>250ms 平滑过渡，无闪烁</td></tr>
+  </table>
+
+  <h3>1.3 不做什么</h3>
+  <ul>
+    <li>不做跟随系统偏好（<code>prefers-color-scheme</code>）的自动模式</li>
+    <li>不做主题定制市场或自定义颜色选择</li>
+    <li>不修改 <code>server/</code> 目录</li>
+    <li>不引入后端 API 调用或新的 UI 库</li>
+    <li>不改变现有功能逻辑和交互流程</li>
+    <li>不对菜品图片做暗色滤镜处理</li>
+  </ul>
+</section>
+
+<section>
+  <h2>2. 用户与场景</h2>
+  <table>
+    <tr><th>用户 / 角色</th><th>使用场景</th><th>当前痛点</th><th>期望结果</th></tr>
+    <tr><td>门店顾客</td><td>晚间堂点，弱光环境下使用手机点单</td><td>浅色背景亮度过高，刺眼不适</td><td>切换为深色主题，降低屏幕亮度，舒适点餐</td></tr>
+    <tr><td>门店店员</td><td>晚间巡台时查看订单和演示控制台</td><td>浅色界面在暗环境中眩光</td><td>深色界面减少光线干扰，操作更专注</td></tr>
+  </table>
+</section>
+
+<section>
+  <h2>3. 功能需求</h2>
+
+  <div class="req-card">
+    <span class="req-id">REQ-001</span><span class="priority priority-p0">P0</span>
+    <h3>黑夜模式切换入口</h3>
+    <p><strong>用户价值：</strong>用户需要一个可见、可操作的入口来切换主题。</p>
+    <p><strong>需求描述：</strong></p>
+    <ul>
+      <li>在 TopBar 工具栏新增图标按钮，位于老人模式按钮和语言切换按钮之间</li>
+      <li>按钮图标：浅色模式显 <code>Moon</code>，暗色模式显 <code>Sun</code>（lucide-react）</li>
+      <li>点击切换主题：浅色 → 暗色 / 暗色 → 浅色</li>
+      <li>提供中/英双语 <code>aria-label</code></li>
+      <li>暗色模式下 <code>Sun</code> 图标以 <code>chili-500</code> 色高亮</li>
+    </ul>
+    <p><strong>验收标准：</strong></p>
+    <ul class="checklist">
+      <li>浅色模式下点击按钮，250ms 内切换为深色主题</li>
+      <li>暗色模式下点击按钮，250ms 内切换回浅色主题</li>
+      <li>按钮图标随当前主题正确切换</li>
+      <li>按钮存在中/英双语 aria-label，随语言切换更新</li>
+    </ul>
+  </div>
+
+  <div class="req-card">
+    <span class="req-id">REQ-002</span><span class="priority priority-p0">P0</span>
+    <h3>黑夜模式状态管理</h3>
+    <p><strong>需求描述：</strong></p>
+    <ul>
+      <li>新建 <code>src/hooks/useDarkMode.ts</code>，架构参照 <code>useElderlyMode.ts</code></li>
+      <li>状态通过 <code>localStorage</code> 持久化，key 为 <code>dark-mode</code>，值为 <code>'true'</code> / <code>'false'</code></li>
+      <li>通过在 <code>document.documentElement</code> 上添加/移除 <code>dark</code> class 驱动 Tailwind <code>dark:</code> 变体</li>
+      <li><code>localStorage</code> 不可用时降级为内存态，不报错不阻塞</li>
+      <li>默认关闭（浅色模式）</li>
+    </ul>
+    <p><strong>验收标准：</strong></p>
+    <ul class="checklist">
+      <li>首次访问默认浅色模式，html 元素无 dark class</li>
+      <li>切换至暗色后，html 添加 dark class，localStorage 中 dark-mode 为 'true'</li>
+      <li>刷新页面后主题从 localStorage 恢复，无 FOUC</li>
+      <li>localStorage 不可用时切换功能正常但不持久化，不抛错</li>
+    </ul>
+  </div>
+
+  <div class="req-card">
+    <span class="req-id">REQ-003</span><span class="priority priority-p0">P0</span>
+    <h3>页面加载防闪烁（FOUC 防护）</h3>
+    <p><strong>需求描述：</strong>在 <code>index.html</code> 内联脚本中，React 挂载前读取 <code>localStorage</code> 的 <code>dark-mode</code> 值，若为 <code>'true'</code> 立即在 <code>document.documentElement</code> 添加 <code>dark</code> class。</p>
+    <p><strong>验收标准：</strong></p>
+    <ul class="checklist">
+      <li>dark-mode 为 'true' 时刷新，首屏直接暗色，无浅色闪烁</li>
+      <li>dark-mode 不存在或为 'false' 时刷新，首屏为浅色</li>
+    </ul>
+  </div>
+
+  <div class="req-card">
+    <span class="req-id">REQ-004</span><span class="priority priority-p0">P0</span>
+    <h3>Tailwind 暗色配置</h3>
+    <p><strong>需求描述：</strong></p>
+    <ul>
+      <li>在 <code>tailwind.config.js</code> 中设置 <code>darkMode: 'class'</code></li>
+      <li>在 <code>theme.extend.colors</code> 中新增暗色专用色阶：
+        <ul>
+          <li><code>dark-bg</code>: <code>#1d1d1d</code>（页面背景）</li>
+          <li><code>dark-surface</code>: <code>#141414</code>（卡片/容器背景）</li>
+          <li><code>dark-elevated</code>: <code>#272727</code>（弹窗/提升面背景）</li>
+          <li><code>dark-border</code>: <code>#3e3e3e</code>（边框）</li>
+          <li><code>dark-text</code>: <code>#dcdcdc</code>（正文文字）</li>
+          <li><code>dark-text-secondary</code>: <code>#adadad</code>（次级文字）</li>
+          <li><code>dark-fill</code>: <code>#303030</code>（填充背景）</li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+
+  <div class="req-card">
+    <span class="req-id">REQ-005</span><span class="priority priority-p0">P0</span>
+    <h3>全视图深色主题适配</h3>
+    <p><strong>需求描述：</strong>为所有视图和组件添加 <code>dark:</code> 变体样式，包括 HomeView、WelcomeView、TopBar、MenuView、OrderView、CheckoutView、CartPanel、ServiceSheet、DemoConsole、Button、Dialog、底部导航栏、全局 toast。</p>
+    <p><strong>暗色色值映射规则：</strong></p>
+    <table>
+      <tr><th>浅色类名</th><th>暗色替换</th><th>说明</th></tr>
+      <tr><td><code>bg-rice-50</code> / <code>bg-rice-100</code></td><td><code>dark:bg-dark-bg</code></td><td>页面背景 → #1d1d1d</td></tr>
+      <tr><td><code>bg-white</code></td><td><code>dark:bg-dark-surface</code></td><td>卡片背景 → #141414</td></tr>
+      <tr><td><code>bg-rice-200</code></td><td><code>dark:bg-dark-elevated</code></td><td>次级面板 → #272727</td></tr>
+      <tr><td><code>text-charcoal-900</code></td><td><code>dark:text-dark-text</code></td><td>主文字 → #dcdcdc</td></tr>
+      <tr><td><code>text-charcoal-500</code> / <code>text-charcoal-700</code></td><td><code>dark:text-dark-text-secondary</code></td><td>次级文字 → #adadad</td></tr>
+      <tr><td><code>border-charcoal-900/5</code> / <code>border-charcoal-900/10</code></td><td><code>dark:border-dark-border</code></td><td>边框 → #3e3e3e</td></tr>
+      <tr><td><code>bg-charcoal-900</code></td><td>保持不变</td><td>深色区域在暗色下仍为深色</td></tr>
+      <tr><td><code>text-chili-500</code></td><td>保持不变</td><td>强调色保持品牌红</td></tr>
+      <tr><td><code>bg-chili-50</code></td><td><code>dark:bg-chili-500/15</code></td><td>浅红背景 → 半透明红</td></tr>
+      <tr><td><code>bg-amber-100</code></td><td><code>dark:bg-amber-400/15</code></td><td>浅琥珀 → 半透明琥珀</td></tr>
+      <tr><td><code>paper-noise</code></td><td><code>dark:paper-noise-dark</code></td><td>噪点纹理适配深色</td></tr>
+    </table>
+    <p><strong>验收标准：</strong></p>
+    <ul class="checklist">
+      <li>切换至暗色后，所有视图背景为深色，无大面积白色残留</li>
+      <li>卡片/弹窗/面板背景为 #141414 或 #272727，与页面背景有层次区分</li>
+      <li>文字在深色背景上对比度 ≥ 4.5:1（WCAG AA）</li>
+      <li>按钮在暗色模式下保持可辨识性</li>
+      <li>边框线在暗色模式下可见但不过于突兀</li>
+      <li>底部导航栏背景为深色，激活态保持 chili-50 半透明</li>
+    </ul>
+  </div>
+
+  <div class="req-card">
+    <span class="req-id">REQ-006</span><span class="priority priority-p1">P1</span>
+    <h3>i18n 文案支持</h3>
+    <p><strong>需求描述：</strong>在 <code>src/i18n.ts</code> 的 <code>common</code> 分组中新增 <code>aria_dark_mode</code>：中文「切换黑夜模式」/ 英文「Toggle dark mode」。</p>
+  </div>
+</section>
+
+<section>
+  <h2>4. 产品规则</h2>
+  <h3>4.1 页面与交互</h3>
+  <table>
+    <tr><th>位置 / 入口</th><th>用户操作</th><th>系统反馈</th><th>备注</th></tr>
+    <tr><td>TopBar 黑夜模式按钮</td><td>点击按钮</td><td>全局主题浅色/暗色切换，250ms 过渡</td><td>位于老人模式按钮与语言切换按钮之间</td></tr>
+    <tr><td>页面刷新</td><td>无</td><td>从 localStorage 恢复主题，首屏无闪烁</td><td>index.html 内联脚本预置 dark class</td></tr>
+  </table>
+
+  <h3>4.2 状态与流转</h3>
+  <table>
+    <tr><th>操作</th><th>前置状态</th><th>目标状态</th><th>用户可见反馈</th></tr>
+    <tr><td>点击黑夜模式按钮</td><td>light</td><td>dark</td><td>界面切换为深色，按钮图标变 Sun</td></tr>
+    <tr><td>点击黑夜模式按钮</td><td>dark</td><td>light</td><td>界面切换为浅色，按钮图标变 Moon</td></tr>
+    <tr><td>页面刷新</td><td>dark</td><td>dark</td><td>首屏直接暗色，无闪烁</td></tr>
+  </table>
+</section>
+
+<section>
+  <h2>5. 约束与风险</h2>
+  <h3>5.1 非功能要求</h3>
+  <table>
+    <tr><th>类别</th><th>要求</th><th>验收方法</th></tr>
+    <tr><td>兼容性</td><td>黑夜模式与老人模式可同时启用</td><td>同时开启两种模式检查</td></tr>
+    <tr><td>性能</td><td>主题切换不引起重排/重绘性能问题</td><td>切换时无明显卡顿</td></tr>
+    <tr><td>可访问性</td><td>暗色模式下文字对比度 ≥ 4.5:1</td><td>对比度检查工具验证</td></tr>
+    <tr><td>可用性</td><td>localStorage 不可用时功能降级不报错</td><td>隐私模式测试</td></tr>
+    <tr><td>一致性</td><td>暗色色值来源于 tokens.dark.json</td><td>与设计系统色值对照</td></tr>
+  </table>
+
+  <h3>5.2 风险与待确认</h3>
+  <table>
+    <tr><th>类型</th><th>描述</th><th>影响</th><th>处理方式</th></tr>
+    <tr><td>风险</td><td>dark: 变体覆盖遗漏导致局部浅色残留</td><td>视觉不一致</td><td>逐视图检查 + E2E 截图对比</td></tr>
+    <tr><td>风险</td><td>老人模式 + 黑夜模式叠加可能影响布局</td><td>布局溢出</td><td>同时启用时检查关键视图</td></tr>
+    <tr><td>待确认</td><td>是否需要跟随系统偏好 prefers-color-scheme</td><td>未来范围</td><td>本次不做，记录为后续迭代项</td></tr>
+  </table>
+</section>
+
+<section>
+  <h2>6. 验收清单</h2>
+  <ul class="checklist">
+    <li>核心用户场景已覆盖：用户在顶栏切换黑夜模式，所有视图适配深色主题</li>
+    <li>每条功能需求都有明确验收标准</li>
+    <li>非目标（不做系统偏好跟随、不做主题定制）已说明</li>
+    <li>暗色色值来源于设计系统 tokens.dark.json，与品牌一致性已确认</li>
+    <li>localStorage 持久化和降级机制已明确</li>
+    <li>FOUC 防护方案已明确</li>
+    <li>与老人模式的兼容性已说明</li>
+  </ul>
+</section>
+
+<div class="footer">
+  <p>PRD-DARK-MODE-001 · 黑夜模式（Dark Mode）主题切换 · 2026-11-18</p>
+</div>
+
+</div>
+</body>
+</html>

@@ -14,6 +14,7 @@ import { TopBar } from '@/components/TopBar'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { useElderlyMode } from '@/hooks/useElderlyMode'
+import { useDarkMode } from '@/hooks/useDarkMode'
 import { initialViewFromHash, useViewRoute } from '@/hooks/useViewRoute'
 import { orderReducer, initialState } from '@/state/orderReducer'
 import { products } from '@/data/menu'
@@ -50,9 +51,11 @@ export default function App() {
   const { t, i18n } = useTranslation()
   const [state, dispatch] = useReducer(orderReducer, undefined, createInitialState)
   const { enabled: elderly, toggle: toggleElderly } = useElderlyMode()
+  const { enabled: darkMode, toggle: toggleDarkMode } = useDarkMode()
   const [serviceOpen, setServiceOpen] = useState(false)
   const [consoleOpen, setConsoleOpen] = useState(false)
   const [cartOpen, setCartOpen] = useState(false)
+  const [toastVisible, setToastVisible] = useState(false)
   const cartTotal = state.cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
   const waitingServices = state.services.filter((service) => service.status === 'waiting').length
 
@@ -72,6 +75,17 @@ export default function App() {
       // localStorage 不可用时降级为内存态，不报错不阻塞
     }
   }, [i18n.language, t])
+
+  // Toast 自动消失：lastMessage 变化时显示，3 秒后自动隐藏
+  useEffect(() => {
+    if (state.lastMessage) {
+      setToastVisible(true)
+      const timer = setTimeout(() => setToastVisible(false), 3000)
+      return () => clearTimeout(timer)
+    } else {
+      setToastVisible(false)
+    }
+  }, [state.lastMessage])
 
   const changeView = (view: ViewName) => dispatch({ type: 'SET_VIEW', view })
   const submitOrder = () => {
@@ -95,7 +109,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-rice-100 paper-noise">
+    <div className="min-h-screen bg-rice-100 paper-noise dark:bg-dark-bg dark:paper-noise-dark">
       <TopBar
         table={state.table}
         view={state.view}
@@ -104,6 +118,8 @@ export default function App() {
         elderly={elderly}
         onToggleLanguage={toggleLanguage}
         onToggleElderly={handleToggleElderly}
+        darkMode={darkMode}
+        onToggleDarkMode={toggleDarkMode}
         onView={changeView}
         onService={() => setServiceOpen(true)}
         onConsole={() => setConsoleOpen(true)}
@@ -117,9 +133,9 @@ export default function App() {
           <aside className="hidden lg:block">
             <div className="sticky top-28">
               <CartPanel items={state.cart} onQuantity={(uid, delta) => dispatch({ type: 'CHANGE_QTY', uid, delta })} onSubmit={submitOrder} />
-              <div className="mt-4 rounded-2xl border border-amber-400/30 bg-amber-100/70 p-4 text-sm text-charcoal-700">
+              <div className="mt-4 rounded-2xl border border-amber-400/30 bg-amber-100/70 p-4 text-sm text-charcoal-700 dark:border-amber-400/30 dark:bg-amber-400/15 dark:text-dark-text-secondary">
                 <p className="font-bold">{t('common.collab_title')}</p>
-                <p className="mt-1 leading-6 text-charcoal-500">{t('common.collab_desc')}</p>
+                <p className="mt-1 leading-6 text-charcoal-500 dark:text-dark-text-secondary">{t('common.collab_desc')}</p>
               </div>
             </div>
           </aside>
@@ -169,23 +185,25 @@ export default function App() {
         )}
       </div>
 
-      <nav className="safe-bottom fixed bottom-0 left-0 right-0 z-30 grid grid-cols-4 border-t border-charcoal-900/5 bg-white/95 px-2 pt-2 backdrop-blur lg:hidden">
+      <nav className="safe-bottom fixed bottom-0 left-0 right-0 z-30 grid grid-cols-4 border-t border-charcoal-900/5 bg-white/95 px-2 pt-2 backdrop-blur dark:border-dark-border dark:bg-dark-surface/95 lg:hidden">
         <MobileNav active={state.view === 'menu'} icon={MenuIcon} label={t('common.nav_menu')} onClick={() => changeView('menu')} />
         <MobileNav active={state.view === 'order'} icon={ClipboardList} label={t('common.nav_order')} onClick={() => changeView('order')} />
         <MobileNav active={serviceOpen} icon={ConciergeBell} label={t('common.nav_service')} badge={waitingServices} onClick={() => setServiceOpen(true)} />
         <MobileNav active={consoleOpen} icon={LayoutDashboard} label={t('common.nav_demo')} onClick={() => setConsoleOpen(true)} />
       </nav>
 
-      <div className="pointer-events-none fixed left-1/2 top-24 z-40 -translate-x-1/2 rounded-full bg-charcoal-900/90 px-4 py-2 text-xs font-semibold text-white shadow-float">
-        {state.lastMessage}
-      </div>
+      {toastVisible && state.lastMessage && (
+        <div className="pointer-events-none fixed left-1/2 top-24 z-40 -translate-x-1/2 rounded-full bg-charcoal-900/90 px-4 py-2 text-xs font-semibold text-white shadow-float transition-opacity duration-300 dark:bg-dark-elevated dark:text-dark-text">
+          {state.lastMessage}
+        </div>
+      )}
     </div>
   )
 }
 
 function MobileNav({ active, icon: Icon, label, badge, onClick }: { active: boolean; icon: typeof MenuIcon; label: string; badge?: number; onClick: () => void }) {
   return (
-    <button onClick={onClick} className={`relative flex flex-col items-center gap-1 rounded-xl py-2 text-xs font-semibold transition ${active ? 'bg-chili-50 text-chili-500' : 'text-charcoal-500'}`}>
+    <button onClick={onClick} className={`relative flex flex-col items-center gap-1 rounded-xl py-2 text-xs font-semibold transition ${active ? 'bg-chili-50 text-chili-500 dark:bg-chili-500/15' : 'text-charcoal-500 dark:text-dark-text-secondary'}`}>
       <Icon size={20} />{label}{badge ? <span className="absolute right-4 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-chili-500 px-1 text-white">{badge}</span> : null}
     </button>
   )
