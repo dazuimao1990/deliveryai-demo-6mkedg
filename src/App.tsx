@@ -55,6 +55,7 @@ export default function App() {
   const [serviceOpen, setServiceOpen] = useState(false)
   const [consoleOpen, setConsoleOpen] = useState(false)
   const [cartOpen, setCartOpen] = useState(false)
+  const [toastVisible, setToastVisible] = useState(false)
   const cartTotal = state.cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
   const waitingServices = state.services.filter((service) => service.status === 'waiting').length
 
@@ -74,6 +75,17 @@ export default function App() {
       // localStorage 不可用时降级为内存态，不报错不阻塞
     }
   }, [i18n.language, t])
+
+  // Toast 自动消失：lastMessage 变化时显示，3 秒后自动隐藏
+  useEffect(() => {
+    if (state.lastMessage) {
+      setToastVisible(true)
+      const timer = setTimeout(() => setToastVisible(false), 3000)
+      return () => clearTimeout(timer)
+    } else {
+      setToastVisible(false)
+    }
+  }, [state.lastMessage])
 
   const changeView = (view: ViewName) => dispatch({ type: 'SET_VIEW', view })
   const submitOrder = () => {
@@ -180,9 +192,11 @@ export default function App() {
         <MobileNav active={consoleOpen} icon={LayoutDashboard} label={t('common.nav_demo')} onClick={() => setConsoleOpen(true)} />
       </nav>
 
-      <div className="pointer-events-none fixed left-1/2 top-24 z-40 -translate-x-1/2 rounded-full bg-charcoal-900/90 px-4 py-2 text-xs font-semibold text-white shadow-float dark:bg-dark-elevated dark:text-dark-text">
-        {state.lastMessage}
-      </div>
+      {toastVisible && state.lastMessage && (
+        <div className="pointer-events-none fixed left-1/2 top-24 z-40 -translate-x-1/2 rounded-full bg-charcoal-900/90 px-4 py-2 text-xs font-semibold text-white shadow-float transition-opacity duration-300 dark:bg-dark-elevated dark:text-dark-text">
+          {state.lastMessage}
+        </div>
+      )}
     </div>
   )
 }
